@@ -1,0 +1,45 @@
+#!/bin/sh
+
+set -u
+
+# User params
+HAPROXY_CONFIG=${HAPROXY_CONFIG:="/etc/haproxy/haproxy.cfg"}
+HAPROXY_USER_PARAMS=$@
+
+# Internal params
+HAPROXY_PID_FILE="/tmp/haproxy.pid"
+HAPROXY_CMD="haproxy -f ${HAPROXY_CONFIG} ${HAPROXY_USER_PARAMS} -D -p ${HAPROXY_PID_FILE}"
+HAPROXY_CHECK_CONFIG_CMD="haproxy -f ${HAPROXY_CONFIG} -c"
+
+print_config(){
+	cat $HAPROXY_CONFIG
+}
+
+log() {
+  echo $1
+}
+
+# start rsyslog
+log "starting rsyslog"
+rsyslogd
+log "waiting 5 seconds"
+sleep 5
+# Launch HAProxy.
+
+$HAPROXY_CHECK_CONFIG_CMD
+$HAPROXY_CMD
+
+log "HAProxy started with $HAPROXY_CONFIG config, pid $(cat $HAPROXY_PID_FILE)."
+
+
+# Check if config has changed
+# Note: also monitor /etc/hosts where the new back-end hosts might be provided.
+while inotifywait -q -e create,delete,modify,attrib $HAPROXY_CONFIG; do
+  log "Restarting HAProxy due to config changes..." && print_config
+  cat $HAPROXY_CONFIG
+  $HAPROXY_CHECK_CONFIG_CMD
+  RELOAD_CMD="$HAPROXY_CMD -sf $(cat $HAPROXY_PID_FILE)"
+  log "$RELOAD_CMD"
+  $RELOAD_CMD
+  log "HAProxy restarted, pid $(cat $HAPROXY_PID_FILE)."
+done
