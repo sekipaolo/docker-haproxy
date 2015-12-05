@@ -8,7 +8,7 @@ Haproxy docker image based on alpine
 ## Mouted config
 
 ```bash
-$ docker run -d -p 80:80 443:443 -v /host/path/to/haproxy.cfg:/etc/haproxy/haproxy.cfg:ro sekipaolo/haproxy
+$ docker run -d -p 80:80 443:443 -v /host/path/to/haproxy.cfg:/etc/haproxy/haproxy.cfg:ro sekipaolo/docker-haproxy
 ```
 
 ## Included config
@@ -20,5 +20,5 @@ EXPOSE 80 443
 ```
 
 ```bash
-$ docker run -d -p 80:80 443:443 sekipaolo/haproxy
+$ docker run -d -p 80:80 443:443 sekipaolo/docker-haproxy
 ```
