@@ -1,7 +1,7 @@
-FROM janeczku/alpine-haproxy:1.6
+FROM alpine:edge
 MAINTAINER Paolo Sechi
 
-RUN apk --update add rsyslog inotify-tools
+RUN apk --update add haproxy rsyslog inotify-tools openssl curl mc
 COPY haproxy.run /home/haproxy/haproxy.run
 RUN chmod +x /home/haproxy/haproxy.run
 
